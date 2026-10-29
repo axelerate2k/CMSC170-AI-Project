@@ -53,9 +53,9 @@ def main():
     train_std = X_train_scaled.std(axis=0).mean()
     test_mean = abs(X_test_scaled.mean(axis=0)).max()
 
-    print(f"    Train mean after scaling (should be 0): {train_mean:.6f}")
-    print(f"    Train std after scaling (should be 1): {train_std:.6f}")
+    print(f"Train mean after scaling (should be 0): {train_mean:.6f}")
+    print(f"Train std after scaling (should be 1): {train_std:.6f}")
 
-    print(f"    Test mean after scaling (close to 0): {test_mean:.4f}")
+    print(f"Test mean after scaling (close to 0): {test_mean:.4f}")
 
 main()
