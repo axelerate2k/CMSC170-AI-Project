@@ -57,4 +57,3 @@ class KNN:
                     predictions.append(0)
 
         return np.array(predictions)
-    
