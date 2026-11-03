@@ -3,6 +3,7 @@ from data_prep import stratified_split, stratified_kfold
 from data_prep import StandardScaler, FEATURE_NAMES
 import numpy as np
 from knn import KNN
+from logistic_regression import LogisticRegression
 
 SEED = 67
 DATA_PATH = "../data/high_diamond_ranked_10min.csv"
@@ -68,6 +69,21 @@ def main():
     print()
     print(f"Chosen: k = {best_k}")
 
+    # find the best learning rate using 5-fold cv on train data
+    print()
+    print("=== Tuning Logistic Regression (5-fold CV) ===")
+    best_lr = None
+    best_lr_acc = 0
+    for lr in [0.001, 0.01, 0.1, 0.5]:
+        mean, std = cv_accuracy(lambda: LogisticRegression(lr, 1000), X_train, y_train)
+        print(f"  lr = {lr:<6} accuracy {mean:.4f} +/- {std:.4f}")
+        if mean > best_lr_acc:
+            best_lr = lr
+            best_lr_acc = mean
+
+    print()
+    print(f"Chosen: learning rate = {best_lr}")
+
     # train on the full training set and test once
     scaler = StandardScaler()
     scaler.fit(X_train)
@@ -78,8 +94,20 @@ def main():
     knn.fit(X_train_s, y_train)
     knn_acc = accuracy(y_test, knn.predict(X_test_s))
 
+    logreg = LogisticRegression(best_lr, 1000)
+    logreg.fit(X_train_s, y_train)
+    logreg_acc = accuracy(y_test, logreg.predict(X_test_s))
+
     print()
     print("=== Test set accuracy ===")
     print(f"  KNN (k = {best_k}): {knn_acc:.4f}")
+    print(f"  Logistic Regression (lr = {best_lr}): {logreg_acc:.4f}")
+
+    # check which features matter most (z-scored so weights are comparable)
+    print()
+    print("=== Logistic Regression weights ===")
+    order = np.argsort(-np.abs(logreg.w))
+    for i in order:
+        print(f"  {FEATURE_NAMES[i]:<20}{logreg.w[i]:+.4f}")
 
 main()
